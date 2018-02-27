@@ -1,3 +1,15 @@
+# mlbgameday 0.1.0
+
+## Enhancements
+
+* Added atbat num to the output of the action table of the innings_all payload.
+
+## Bug Fixes
+
+* Fixed mal-formed urls returned by the `make_gids()` function.
+
+* Added error checks to the xml mapping in the `transform_payload()` function.
+
 # mlbgameday 0.0.1
 
 ## Enhancements

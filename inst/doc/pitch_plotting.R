@@ -33,7 +33,7 @@ ggplot() +
 
 ## ------------------------------------------------------------------------
 # Subset the data to only called strikes.
-strikes <- subset(pitches, des.x == "Called Strike")
+strikes <- subset(pitches, des == "Called Strike")
 
 library(pitchRx)
 library(viridis)
