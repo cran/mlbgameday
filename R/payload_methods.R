@@ -118,9 +118,11 @@ payload.gd_game_events <- function(urlz, ...) {
 #' @keywords internal
 #' @import xml2
 #' @importFrom stringr str_sub str_replace_all
-#' @importFrom dplyr bind_rows left_join rename
+#' @importFrom dplyr bind_rows left_join rename select arrange
 #' @importFrom purrr map_dfr
 #' @importFrom stats setNames
+#' @importFrom tidyr fill
+#' @importFrom stats na.omit
 #' @import foreach
 #' @export
 
@@ -137,12 +139,14 @@ payload.gd_inning_all <- function(urlz, ...) {
                                                      xml2::xml_find_all(file, "./inning/bottom/atbat")) 
                                     action_nodes <- c(xml2::xml_find_all(file, "./inning/top/action"), 
                                                       xml2::xml_find_all(file, "./inning/bottom/action"))
+
                                     # Make action nodes a child of atbat so we can get the at-bat number for which the action took place.
-                                    for (a in seq_along(action_nodes)) {
-                                        xml2::xml_add_child(atbat_nodes[[a]], action_nodes[[a]], .where = "after", free = T)
-                                    }
-                                    action_nodes <- c(xml2::xml_find_all(file, "./inning/top/atbat/action"), 
-                                                      xml2::xml_find_all(file, "./inning/bottom/atbat/actioin"))
+                                    #for (a in seq_along(action_nodes)) {
+                                    #    xml2::xml_add_child(atbat_nodes[[a]], action_nodes[[a]], .where = "after", free = T)
+                                    #}
+
+                                    #action_nodes <- c(xml2::xml_find_all(file, "./inning/top/atbat/action"), 
+                                    #                  xml2::xml_find_all(file, "./inning/bottom/atbat/actioin"))
                                     
                                     pitch_nodes <- c(xml2::xml_find_all(file, "./inning/top/atbat/pitch"),
                                                      xml2::xml_find_all(file, "./inning/bottom/atbat/pitch"))
@@ -150,14 +154,12 @@ payload.gd_inning_all <- function(urlz, ...) {
                                                       xml2::xml_find_all(file, "./inning/bottom/atbat/runner")) 
                                     po_nodes <- c(xml2::xml_find_all(file, "./inning/top/atbat/po"), 
                                                   xml2::xml_find_all(file, "./inning/bottom/atbat/po"))
-                                    url <- urlz[[i]]
                                     
+                                    url <- urlz[[i]]
                                     
                                     date_dt <- stringr::str_sub(urlz[[i]], 70, 81) %>% stringr::str_replace_all("_", "-") %>%
                                         as.Date(format = "%Y-%m-%d")
                                     gameday_link <- stringr::str_sub(urlz[[i]], 66, -23)
-                                    
-                                    
                                     
                                     list(                        
                                         atbat <- purrr::map_dfr(atbat_nodes, function(x) {
@@ -173,10 +175,10 @@ payload.gd_inning_all <- function(urlz, ...) {
                                         
                                         action <- purrr::map_dfr(action_nodes, function(x) {
                                             out <- data.frame(t(xml2::xml_attrs(x)), stringsAsFactors=FALSE)
-                                            out$inning <- as.numeric(xml2::xml_parent(xml2::xml_parent(xml2::xml_parent(x))) %>% xml2::xml_attr("num"))
-                                            out$next_ <- as.character(xml2::xml_parent(xml2::xml_parent(xml2::xml_parent(x))) %>% xml2::xml_attr("next"))
-                                            out$num <- as.numeric(xml2::xml_parent(x) %>% xml2::xml_attr("num"))
-                                            out$inning_side <- as.character(xml2::xml_name(xml2::xml_parent(xml2::xml_parent(x))))
+                                            out$inning <- as.numeric(xml2::xml_parent(xml2::xml_parent(x)) %>% xml2::xml_attr("num"))
+                                            out$next_ <- as.character(xml2::xml_parent(xml2::xml_parent(x)) %>% xml2::xml_attr("next"))
+                                            #out$num <- as.numeric(xml2::xml_parent(x) %>% xml2::xml_attr("num"))
+                                            out$inning_side <- as.character(xml2::xml_name(xml2::xml_parent(x)))
                                             out$url <- url
                                             out$gameday_link <- gameday_link
                                             out
@@ -228,6 +230,15 @@ payload.gd_inning_all <- function(urlz, ...) {
     runner <- dplyr::bind_rows(out$runner)
     po <- dplyr::bind_rows(out$po)
     
+    # Make of game timeline of atbat and action so we know which atbat to assign an action to.
+    acts <- action %>% dplyr::select(tfs_zulu, inning, inning_side, des)
+    bats <- atbat %>% dplyr::select(end_tfs_zulu, num, inning, inning_side) %>% dplyr::rename(tfs_zulu = end_tfs_zulu)
+    events <- dplyr::bind_rows(acts, bats) %>%
+        dplyr::arrange(tfs_zulu) %>% dplyr::mutate(num = as.numeric(num)) %>%
+        tidyr::fill(num, .direction = "up") %>% na.omit()
+    
+    action <- dplyr::left_join(action, events, by = c("tfs_zulu", "inning", "inning_side", "des"))
+    
     innings_df <- list(atbat=atbat, action=action, pitch=pitch, runner=runner, po=po)
     # Add batter and pitcher names to the atbat data frame
     player.env <- environment()
@@ -259,7 +270,7 @@ payload.gd_inning_hit <- function(urlz, ...) {
     innings_df <- foreach::foreach(i = seq_along(urlz), .combine="rbind", .multicombine=T, .inorder=TRUE) %dopar% {
         file <- tryCatch(xml2::read_xml(urlz[[i]][[1]], n=256), error=function(e) NULL)
         if(!isTRUE(is.null(file))){
-            date_dt <- stringr::str_sub(urlz[[i]], 71, 80) %>% stringr::str_replace_all("_", "-") %>%
+            date_dt <- stringr::str_sub(urlz[[1]], 70, 79) %>% stringr::str_replace_all("_", "-") %>%
                 as.Date(format = "%Y-%m-%d")
             gameday_link <- stringr::str_sub(urlz[[i]], 66, -23)
             hip_nodes <- xml2::xml_find_all(file, "/hitchart/hip")
@@ -296,9 +307,9 @@ payload.gd_linescore <- function(urlz, ...) {
                             .init=list(list(), list())) %dopar% {
                                 file <- tryCatch(xml2::read_xml(urlz[[i]][[1]], n=256), error=function(e) NULL)
                                 if(!isTRUE(is.null(file))){
-                                    date_dt <- stringr::str_sub(urlz[[i]], 71, 80) %>% stringr::str_replace_all("_", "-") %>%
+                                    date_dt <- stringr::str_sub(urlz[[i]], 70, 80) %>% stringr::str_replace_all("_", "-") %>%
                                         as.Date(format = "%Y-%m-%d")
-                                    gameday_link <- stringr::str_sub(urlz[[i]], 66, -23)
+                                    gameday_link <- stringr::str_sub(urlz[[1]], 66, -15)
                                     game_nodes <- xml2::xml_find_all(file, "/game")
                                     media_nodes <- xml2::xml_find_all(file, "/game/game_media/media")
                                     

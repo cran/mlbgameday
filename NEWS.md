@@ -1,3 +1,15 @@
+# mlbgameday 0.1.1
+
+## Enhancements
+
+* Added overwrite argument to the `get_payload()` function.
+
+* Enhanced the logic that ties action nodes to atbat nodes.
+
+## Bug Fixes
+
+* Inconsistent column ordering in linescore dataset caused `dbWrite()` errors.
+
 # mlbgameday 0.1.0
 
 ## Enhancements
