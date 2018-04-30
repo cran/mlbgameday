@@ -14,7 +14,7 @@
 
 <meta name="date" content="2018-04-30" />
 
-<title>mlbgameday: Search Games</title>
+<title>mlbgameday: Data Storage</title>
 
 
 
@@ -68,70 +68,23 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 
 
-<h1 class="title toc-ignore">mlbgameday: Search Games</h1>
+<h1 class="title toc-ignore">mlbgameday: Data Storage</h1>
 <h4 class="author"><em>Kris Eberwein</em></h4>
 <h4 class="date"><em>2018-04-30</em></h4>
 
 
 
-<p>In many cases, we may want to search for a specific player, stadium, or team. The <code>search_gids()</code> function provide limited functionality for such searches. Arguments include; team=NULL, start=NULL, end=NULL, venue=NULL, game_type=NULL, home_only=FALSE, away_only=FALSE.</p>
-<div id="examples" class="section level1">
-<h1>Examples</h1>
-<p>Find only regular season games for the 2016 season.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(mlbgameday)
+<span class="kw">library</span>(RSQLite)
 
-gids &lt;-<span class="st"> </span><span class="kw">search_gids</span>(<span class="dt">start =</span> <span class="st">&quot;2016-01-01&quot;</span>, <span class="dt">end =</span> <span class="st">&quot;2017-01-01&quot;</span>, <span class="dt">game_type =</span> <span class="st">&quot;r&quot;</span>)</code></pre></div>
-<p>Find only regular season games played at Wrigley Field in 2016.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(mlbgameday)
+<span class="co"># Create an empty database instance.</span>
+con &lt;-<span class="st"> </span><span class="kw">dbConnect</span>(RSQLite<span class="op">::</span><span class="kw">SQLite</span>(), <span class="dt">dbname =</span> <span class="st">&quot;mlbgameday.sqlite3&quot;</span>)
 
-gids &lt;-<span class="st"> </span><span class="kw">search_gids</span>(<span class="dt">start =</span> <span class="st">&quot;2016-01-01&quot;</span>, <span class="dt">end =</span> <span class="st">&quot;2017-01-01&quot;</span>, <span class="dt">game_type =</span> <span class="st">&quot;r&quot;</span>, <span class="dt">venue =</span> <span class="st">&quot;Wrigley Field&quot;</span>)
-
-<span class="co"># This also works with a &quot;fuzzy search&quot;</span>
-
-gids &lt;-<span class="st"> </span><span class="kw">search_gids</span>(<span class="dt">start =</span> <span class="st">&quot;2016-01-01&quot;</span>, <span class="dt">end =</span> <span class="st">&quot;2017-01-01&quot;</span>, <span class="dt">game_type =</span> <span class="st">&quot;r&quot;</span>, <span class="dt">venue =</span> <span class="st">&quot;Wrigley&quot;</span>)</code></pre></div>
-<div id="game-types" class="section level2">
-<h2>Game Types</h2>
-<p>The <code>game_type =</code> argument accects the following:</p>
-<ul>
-<li><p>“r” = regular season</p></li>
-<li><p>“d” = divisional playoffs</p></li>
-<li><p>“l” = leauge playoffs</p></li>
-<li><p>“w” = World Series</p></li>
-<li><p>“a” = all-star games</p></li>
-<li><p>“s” = spring training</p></li>
-<li><p>“e” = exabition game</p></li>
-</ul>
-<p>Find only home games played by the Cleveland Indians in the regular season (regardless of stadium).</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(mlbgameday)
-
-gids &lt;-<span class="st"> </span><span class="kw">search_gids</span>(<span class="dt">team =</span> <span class="st">&quot;indians&quot;</span>, <span class="dt">start =</span> <span class="st">&quot;2015-01-01&quot;</span>, <span class="dt">end =</span> <span class="st">&quot;2015-01-01&quot;</span>, <span class="dt">game_type =</span> <span class="st">&quot;r&quot;</span>)</code></pre></div>
-</div>
-<div id="venue" class="section level2">
-<h2>Venue</h2>
-<p>The <code>search_gids()</code> function performs a “fuzzy match,” on names of teams and ball parks. For example, we don’t have to type out “Oriole Park at Camden Yards,” simply “Camden” or “Camden Yards” will work.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(mlbgameday)
-
-<span class="co"># This workds.</span>
-
-gids &lt;-<span class="st"> </span><span class="kw">search_gids</span>(<span class="dt">team =</span> <span class="st">&quot;orioles&quot;</span>, <span class="dt">start =</span> <span class="st">&quot;2016-01-01&quot;</span>, <span class="dt">end =</span> <span class="st">&quot;2017-01-01&quot;</span>, <span class="dt">venue =</span> <span class="st">&quot;Oriole Park at Camden Yards&quot;</span>)
-
-<span class="co"># This also works.</span>
-
-gids &lt;-<span class="st"> </span><span class="kw">search_gids</span>(<span class="dt">team =</span> <span class="st">&quot;orioles&quot;</span>, <span class="dt">start =</span> <span class="st">&quot;2016-01-01&quot;</span>, <span class="dt">end =</span> <span class="st">&quot;2017-01-01&quot;</span>, <span class="dt">venue =</span> <span class="st">&quot;Camden&quot;</span>)</code></pre></div>
-<p>Be careful about venue changes or venue name changes. For example, “Marlins Park” opened in 2012, so the follwoing will not work.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(mlbgameday)
-
-gids &lt;-<span class="st"> </span><span class="kw">search_gids</span>(<span class="dt">team =</span> <span class="st">&quot;marlins&quot;</span>, <span class="dt">start =</span> <span class="st">&quot;2010-01-01&quot;</span>, <span class="dt">end =</span> <span class="st">&quot;2011-01-01&quot;</span>, <span class="dt">venue =</span> <span class="st">&quot;Marlins Park&quot;</span>)</code></pre></div>
-<p>Instead, we would have to use the name of the old stadium. If we’re not sure, the safest way would be to use <code>home_only = TRUE</code>.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(mlbgameday)
-
-gids &lt;-<span class="st"> </span><span class="kw">search_gids</span>(<span class="dt">team =</span> <span class="st">&quot;marlins&quot;</span>, <span class="dt">start =</span> <span class="st">&quot;2010-01-01&quot;</span>, <span class="dt">end =</span> <span class="st">&quot;2011-01-01&quot;</span>, <span class="dt">venue =</span> <span class="st">&quot;Sun Life Stadium&quot;</span>)
-
-<span class="co"># This will return the same result if we don't know the name of the stadium.</span>
-
-gids &lt;-<span class="st"> </span><span class="kw">search_gids</span>(<span class="dt">team =</span> <span class="st">&quot;marlins&quot;</span>, <span class="dt">start =</span> <span class="st">&quot;2010-01-01&quot;</span>, <span class="dt">end =</span> <span class="st">&quot;2011-01-01&quot;</span>, <span class="dt">home_only =</span> <span class="ot">TRUE</span>, <span class="dt">game_type =</span> <span class="st">&quot;r&quot;</span>)</code></pre></div>
-</div>
-</div>
+<span class="kw">get_payload</span>(<span class="dt">start =</span> <span class="st">&quot;2018-01-01&quot;</span>, <span class="dt">end =</span> <span class="st">&quot;2018-03-28&quot;</span>, <span class="dt">db_con =</span> con)</code></pre></div>
+<pre><code>## Gathering Gameday data, please be patient...</code></pre>
+<pre><code>## Processing data chunk 1 of 2</code></pre>
+<pre><code>## Processing data chunk 2 of 2</code></pre>
+<pre><code>## Transaction complete, disconnecting from the database. 2018-04-30 15:10:28</code></pre>
 
 
 
