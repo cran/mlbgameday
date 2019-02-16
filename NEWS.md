@@ -1,3 +1,37 @@
+# mlbgameday 0.1.4
+
+## Bug Fix
+
+* Removed duplicate vignette titles
+
+# mlbgameday 0.1.3
+
+## Data
+
+* Updated 2018 game_ids
+
+* Updated 2018 players
+
+* Updated 2018 venues
+
+* Updated 2018 umpires
+
+## Vignettes
+
+* Removed `plotly` from documentation due to downstream dependency issues.
+
+* Removed `pitchRx` and dependency `viridis` due to deprecation.
+
+* Removed Data Storage and Parallel Processing vignettes becuase that material is covered elsewhere.
+
+# mlbgameday 0.1.2.1
+
+## Bug fixes
+
+* Game ids were being cut off in the bis_boxscore dataset. Fixed the string length.
+
+* Calculation for atbat number changed from end_tfs_zulu to start_tfs_zulu due to missing data for some games.
+
 # mlbgameday 0.1.2
 
 ## Enhancements

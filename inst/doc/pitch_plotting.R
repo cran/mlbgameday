@@ -31,29 +31,3 @@ ggplot() +
 
 
 
-## ------------------------------------------------------------------------
-# Subset the data to only called strikes.
-strikes <- subset(pitches, des == "Called Strike")
-
-library(pitchRx)
-library(viridis)
-pitchRx::strikeFX(pitches, geom = "tile") + 
-    facet_grid(pitcher_name ~ stand) +
-    coord_equal() +
-    theme_bw() +
-    scale_fill_viridis()
-
-
-## ------------------------------------------------------------------------
-library(plotly)
-plot_ly(pitches, x = ~px, y = ~pz, mode = 'markers', 
-        color = ~pitch_type, marker = list(size = 7, line = list(color = ~pitch_type, width = 1)),
-        text = ~paste("Pitch Type: ", pitch_type)) %>% 
-    layout(title = "Anatomy of a No-Hitter", xaxis = list(zeroline=F), yaxis = list(zeroline=F)) %>%
-    # Draw a box for the strikezone. 
-    layout(shapes = list(type = "rect", fillcolor = "blue", 
-                         line = list(color = "blue"), opacity = 0.2,
-                         x0 = -0.95, x1 = 0.95, xref = "x",
-                         y0 = 3.5, y1 = 1.6, yref = "y"))
-
-

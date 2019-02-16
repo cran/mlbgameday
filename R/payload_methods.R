@@ -22,7 +22,7 @@ payload.gd_bis_boxscore <- function(urlz, ...) {
                                 if(!isTRUE(is.null(file))){
                                     date_dt <- stringr::str_sub(urlz[[i]], 71, 80) %>% stringr::str_replace_all("_", "-") %>%
                                         as.Date(format = "%Y-%m-%d")
-                                    gameday_link <- stringr::str_sub(urlz[[i]], 66, -23)
+                                    gameday_link <- stringr::str_sub(urlz[[i]], 66, -18)
                                     pitch_nodes <- xml2::xml_find_all(file, "/boxscore/pitching/pitcher")
                                     bat_nodes <- xml2::xml_find_all(file, "/boxscore/batting/batter")
                                     
@@ -230,7 +230,7 @@ payload.gd_inning_all <- function(urlz, ...) {
     
     # Make of game timeline of atbat and action so we know which atbat to assign an action to.
     acts <- action %>% dplyr::select(tfs_zulu, inning, inning_side, des)
-    bats <- atbat %>% dplyr::select(end_tfs_zulu, num, inning, inning_side) %>% dplyr::rename(tfs_zulu = end_tfs_zulu)
+    bats <- atbat %>% dplyr::select(start_tfs_zulu, num, inning, inning_side) %>% dplyr::rename(tfs_zulu = start_tfs_zulu)
     events <- dplyr::bind_rows(acts, bats) %>%
         dplyr::arrange(tfs_zulu) %>% dplyr::mutate(num = as.numeric(num)) %>%
         tidyr::fill(num, .direction = "up") %>% na.omit()
@@ -310,7 +310,7 @@ payload.gd_linescore <- function(urlz, ...) {
                                 if(!isTRUE(is.null(file))){
                                     date_dt <- stringr::str_sub(urlz[[i]], 70, 80) %>% stringr::str_replace_all("_", "-") %>%
                                         as.Date(format = "%Y-%m-%d")
-                                    gameday_link <- stringr::str_sub(urlz[[1]], 66, -15)
+                                    gameday_link <- stringr::str_sub(urlz[[i]], 66, -15)
                                     game_nodes <- xml2::xml_find_all(file, "/game")
                                     media_nodes <- xml2::xml_find_all(file, "/game/game_media/media")
                                     

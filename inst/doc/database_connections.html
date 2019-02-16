@@ -12,14 +12,14 @@
 
 <meta name="author" content="Kris Eberwein" />
 
-<meta name="date" content="2018-04-30" />
+<meta name="date" content="2019-02-16" />
 
 <title>mlbgameday: Database Connections</title>
 
 
 
 <style type="text/css">code{white-space: pre;}</style>
-<style type="text/css">
+<style type="text/css" data-origin="pandoc">
 div.sourceCode { overflow-x: auto; }
 table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
   margin: 0; padding: 0; vertical-align: baseline; border: none; }
@@ -55,7 +55,29 @@ code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
 code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
 code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
 code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+
 </style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' || rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
 
 
 
@@ -70,7 +92,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">mlbgameday: Database Connections</h1>
 <h4 class="author"><em>Kris Eberwein</em></h4>
-<h4 class="date"><em>2018-04-30</em></h4>
+<h4 class="date"><em>2019-02-16</em></h4>
 
 
 
@@ -94,7 +116,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <span class="co"># Create SQLite database.</span>
 
-con &lt;-<span class="st"> </span>DBI<span class="op">::</span><span class="kw">dbConnect</span>(RSQLite<span class="op">::</span><span class="kw">SQLite</span>(), <span class="dt">dbname =</span> <span class="st">&quot;gameday.sqlite3&quot;</span>)</code></pre></div>
+con &lt;-<span class="st"> </span>DBI::<span class="kw">dbConnect</span>(RSQLite::<span class="kw">SQLite</span>(), <span class="dt">dbname =</span> <span class="st">&quot;gameday.sqlite3&quot;</span>)</code></pre></div>
 <p>Now that the empty database is created in our working directory, we can populate it. For the sake of brevity, we will search for only the games played in the 2016 World Series.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Create a list of game_ids for the 2016 World Series.</span>
 
@@ -106,7 +128,7 @@ game_ids &lt;-<span class="st"> </span><span class="kw">search_gids</span>(<span
 
 <span class="co"># Re-connect to database since the get_payload() function closed the connection.</span>
 
-con &lt;-<span class="st"> </span>DBI<span class="op">::</span><span class="kw">dbConnect</span>(RSQLite<span class="op">::</span><span class="kw">SQLite</span>(), <span class="dt">dbname =</span> <span class="st">&quot;gameday.sqlite3&quot;</span>)
+con &lt;-<span class="st"> </span>DBI::<span class="kw">dbConnect</span>(RSQLite::<span class="kw">SQLite</span>(), <span class="dt">dbname =</span> <span class="st">&quot;gameday.sqlite3&quot;</span>)
 
 <span class="co"># Take a look at our tables.</span>
 
@@ -134,12 +156,12 @@ pitch &lt;-<span class="st"> </span><span class="kw">tbl</span>(con, <span class
 
 <span class="kw">summary</span>(atbat)
 
-query &lt;-<span class="st"> </span>pitch <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">left_join</span>(atbat, <span class="dt">by =</span> <span class="kw">c</span>(<span class="st">&quot;num&quot;</span>, <span class="st">&quot;url&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span>
-<span class="st">    </span><span class="kw">filter</span>(batter_name <span class="op">==</span><span class="st"> &quot;Kyle Schwarber&quot;</span>)</code></pre></div>
+query &lt;-<span class="st"> </span>pitch %&gt;%<span class="st"> </span><span class="kw">left_join</span>(atbat, <span class="dt">by =</span> <span class="kw">c</span>(<span class="st">&quot;num&quot;</span>, <span class="st">&quot;url&quot;</span>)) %&gt;%<span class="st"> </span>
+<span class="st">    </span><span class="kw">filter</span>(batter_name ==<span class="st"> &quot;Kyle Schwarber&quot;</span>)</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Construct a query using dplyr verbs. Notice here that the &quot;query&quot; still hasn't loaded any data.</span>
 
-query &lt;-<span class="st"> </span>pitch <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">left_join</span>(atbat, <span class="dt">by =</span> <span class="kw">c</span>(<span class="st">&quot;num&quot;</span>, <span class="st">&quot;url&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span>
-<span class="st">    </span><span class="kw">filter</span>(batter_name <span class="op">==</span><span class="st"> &quot;Kyle Schwarber&quot;</span>)
+query &lt;-<span class="st"> </span>pitch %&gt;%<span class="st"> </span><span class="kw">left_join</span>(atbat, <span class="dt">by =</span> <span class="kw">c</span>(<span class="st">&quot;num&quot;</span>, <span class="st">&quot;url&quot;</span>)) %&gt;%<span class="st"> </span>
+<span class="st">    </span><span class="kw">filter</span>(batter_name ==<span class="st"> &quot;Kyle Schwarber&quot;</span>)
 
 <span class="co"># Once we have the subset we want, we can pull that into the R enviornment as a data frame.</span>
 
