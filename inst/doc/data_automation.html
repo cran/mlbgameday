@@ -12,7 +12,7 @@
 
 <meta name="author" content="Kris Eberwein" />
 
-<meta name="date" content="2019-02-16" />
+<meta name="date" content="2019-04-02" />
 
 <title>mlbgameday: Data Automation</title>
 
@@ -92,7 +92,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">mlbgameday: Data Automation</h1>
 <h4 class="author"><em>Kris Eberwein</em></h4>
-<h4 class="date"><em>2019-02-16</em></h4>
+<h4 class="date"><em>2019-04-02</em></h4>
 
 
 
@@ -105,19 +105,19 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <span class="kw">library</span>(RSQLite)
 
 <span class="co"># Create an empty database instance.</span>
-con &lt;-<span class="st"> </span><span class="kw">dbConnect</span>(RSQLite::<span class="kw">SQLite</span>(), <span class="dt">dbname =</span> <span class="st">&quot;mlbgameday.sqlite3&quot;</span>)
+con &lt;-<span class="st"> </span><span class="kw">dbConnect</span>(RSQLite<span class="op">::</span><span class="kw">SQLite</span>(), <span class="dt">dbname =</span> <span class="st">&quot;mlbgameday.sqlite3&quot;</span>)
 
 <span class="co"># Load the first day of the 2018 season.</span>
 <span class="kw">get_payload</span>(<span class="dt">start =</span> <span class="st">&quot;2018-03-30&quot;</span>, <span class="dt">end =</span> <span class="st">&quot;2018-03-30&quot;</span>, <span class="dt">db_con =</span> con)</code></pre></div>
 <pre><code>## Gathering Gameday data, please be patient...</code></pre>
 <pre><code>## Processing data chunk 1 of 1</code></pre>
 <pre><code>## Warning: executing %dopar% sequentially: no parallel backend registered</code></pre>
-<pre><code>## Transaction complete, disconnecting from the database. 2019-02-16 14:18:29</code></pre>
+<pre><code>## Transaction complete, disconnecting from the database. 2019-04-02 14:08:43</code></pre>
 </div>
 <div id="check-the-default-instance" class="section level2">
 <h2>Check The Default Instance</h2>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Re-connect to database since the get_payload() function closed the connection.</span>
-con &lt;-<span class="st"> </span>DBI::<span class="kw">dbConnect</span>(RSQLite::<span class="kw">SQLite</span>(), <span class="dt">dbname =</span> <span class="st">&quot;mlbgameday.sqlite3&quot;</span>)
+con &lt;-<span class="st"> </span>DBI<span class="op">::</span><span class="kw">dbConnect</span>(RSQLite<span class="op">::</span><span class="kw">SQLite</span>(), <span class="dt">dbname =</span> <span class="st">&quot;mlbgameday.sqlite3&quot;</span>)
 
 <span class="co"># Take a look at our tables.</span>
 <span class="kw">dbListTables</span>(con)</code></pre></div>
@@ -130,13 +130,13 @@ con &lt;-<span class="st"> </span>DBI::<span class="kw">dbConnect</span>(RSQLite
 <span class="kw">library</span>(RSQLite)
 
 <span class="co"># Log into your database and retreive the most recent date.</span>
-con &lt;-<span class="st"> </span><span class="kw">dbConnect</span>(RSQLite::<span class="kw">SQLite</span>(), <span class="dt">dbname =</span> <span class="st">&quot;mlbgameday.sqlite3&quot;</span>)
+con &lt;-<span class="st"> </span><span class="kw">dbConnect</span>(RSQLite<span class="op">::</span><span class="kw">SQLite</span>(), <span class="dt">dbname =</span> <span class="st">&quot;mlbgameday.sqlite3&quot;</span>)
 
 <span class="co"># Find the last day of data in the current database.</span>
 db_end &lt;-<span class="st"> </span><span class="kw">dbGetQuery</span>(con, <span class="st">&quot;SELECT MAX(date) FROM atbat&quot;</span>)
 
 <span class="co"># Use the max date +1 as the start date and today -1 for the end date for your new payload.</span>
-<span class="kw">get_payload</span>(<span class="dt">start =</span> <span class="kw">as.Date</span>(db_end[<span class="dv">1</span>,<span class="dv">1</span>]) +<span class="st"> </span><span class="dv">1</span>, <span class="dt">end =</span> <span class="kw">Sys.Date</span>() -<span class="st"> </span><span class="dv">1</span>, <span class="dt">db_con =</span> con)</code></pre></div>
+<span class="kw">get_payload</span>(<span class="dt">start =</span> <span class="kw">as.Date</span>(db_end[<span class="dv">1</span>,<span class="dv">1</span>]) <span class="op">+</span><span class="st"> </span><span class="dv">1</span>, <span class="dt">end =</span> <span class="kw">Sys.Date</span>() <span class="op">-</span><span class="st"> </span><span class="dv">1</span>, <span class="dt">db_con =</span> con)</code></pre></div>
 </div>
 <div id="task-scheduling" class="section level2">
 <h2>Task Scheduling</h2>
